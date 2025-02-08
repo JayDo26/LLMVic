@@ -15,8 +15,10 @@ from typing import Generator, Optional, Union, Dict, List, Any
 
 import aiohttp
 import fastapi
+from fastapi import FastAPI, UploadFile, File
 from fastapi import Depends, HTTPException
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
@@ -62,6 +64,8 @@ from fastchat.protocol.api_protocol import (
     APITokenCheckResponseItem,
 )
 from fastchat.utils import build_logger
+
+from pyngrok import ngrok
 
 logger = build_logger("openai_api_server", "openai_api_server.log")
 
@@ -406,7 +410,6 @@ async def show_available_models():
     for m in models:
         model_cards.append(ModelCard(id=m, root=m, permission=[ModelPermission()]))
     return ModelList(data=model_cards)
-
 
 @app.post("/v1/chat/completions", dependencies=[Depends(check_api_key)])
 async def create_chat_completion(request: ChatCompletionRequest):
@@ -936,4 +939,6 @@ if __name__ == "__main__":
             ssl_certfile=os.environ["SSL_CERTFILE"],
         )
     else:
+        public_url = ngrok.connect(args.port)
+        print(f" * Ngrok Public URL: \"{public_url}\" -> \"http://127.0.0.1:{args.port}/\"")
         uvicorn.run(app, host=args.host, port=args.port, log_level="info")
