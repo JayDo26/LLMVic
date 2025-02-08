@@ -47,7 +47,7 @@ def main():
     args = parser.parse_args()
 
 
-    # Start server with PDF path
+    # Start server 
     start_fastchat_server(api_port=args.api_port)
 
 if __name__ == "__main__":
